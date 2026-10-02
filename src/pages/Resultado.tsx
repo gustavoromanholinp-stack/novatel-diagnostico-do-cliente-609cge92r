@@ -98,14 +98,65 @@ const Resultado = ({ contexto, onVoltar }: Props) => {
                 {dadosMk.servico.plano} · Ativo {dadosMk.servico.ativo_id}
               </p>
             )}
-            {dadosMk.faturas?.map((f) => (
-              <p key={f.id}>
-                <span className="font-medium">Fatura:</span> R${' '}
-                {(f.valor_centavos / 100).toFixed(2).replace('.', ',')} ·{' '}
-                {f.situacao ?? 'situação não informada'}
-                {f.dias_vencidos !== null ? ` · ${f.dias_vencidos} dia(s) em atraso` : ''}
-              </p>
-            ))}
+            {dadosMk.faturas != null && dadosMk.faturas.length > 0 && (
+              <table className="mt-2 w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b text-muted-foreground">
+                    <th scope="col" className="py-1 pr-2 font-medium">
+                      Fatura
+                    </th>
+                    <th scope="col" className="py-1 pr-2 font-medium">
+                      Valor
+                    </th>
+                    <th scope="col" className="py-1 pr-2 font-medium">
+                      Situação
+                    </th>
+                    <th scope="col" className="py-1 pr-2 font-medium">
+                      Vencimento
+                    </th>
+                    <th scope="col" className="py-1 font-medium">
+                      Dias em atraso
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {dadosMk.faturas.map((f) => {
+                    const valor =
+                      f.valor_centavos != null
+                        ? `R$ ${(f.valor_centavos / 100).toFixed(2).replace('.', ',')}`
+                        : 'Não localizado'
+                    const situacao = f.situacao ?? 'Não localizado'
+                    const vencimento =
+                      f.vencimento != null
+                        ? f.vencimento.split('-').reverse().join('/')
+                        : 'Não localizado'
+                    const dias =
+                      f.dias_vencidos === null
+                        ? 'Não localizado'
+                        : f.dias_vencidos === 0
+                          ? f.situacao === 'paga'
+                            ? '0 (paga)'
+                            : '0 (em dia)'
+                          : String(f.dias_vencidos)
+                    return (
+                      <tr key={f.id} className="border-b">
+                        <td className="py-1 pr-2">{f.id}</td>
+                        <td className="py-1 pr-2">{valor}</td>
+                        <td className="py-1 pr-2">{situacao}</td>
+                        <td className="py-1 pr-2">{vencimento}</td>
+                        <td className="py-1">{dias}</td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            )}
+            {dadosMk.faturas != null && dadosMk.faturas.length === 0 && (
+              <p role="status">Nenhuma fatura registrada para este cliente na demonstração.</p>
+            )}
+            {dadosMk.faturas == null && (
+              <p role="status">Faturas não localizadas para este cliente.</p>
+            )}
           </CardContent>
         </Card>
 
