@@ -1,9 +1,9 @@
 import { useCallback, useState } from 'react'
-import Index from './pages/Index'
-import Progresso from './pages/Progresso'
-import Resultado from './pages/Resultado'
-import type { ConsultaAlvo } from './lib/central/use-consulta'
-import { useConsulta } from './lib/central/use-consulta'
+import Index from './Index'
+import Progresso from './Progresso'
+import Resultado from './Resultado'
+import type { ConsultaAlvo } from '../lib/central/use-consulta'
+import { useConsulta } from '../lib/central/use-consulta'
 
 const Central = () => {
   const [emConsulta, setEmConsulta] = useState(false)
