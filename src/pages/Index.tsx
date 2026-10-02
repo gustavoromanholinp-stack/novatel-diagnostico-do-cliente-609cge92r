@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { MockProvider } from '@/lib/central/mock-provider'
+import { provider } from '@/lib/central/provider'
 import {
   CENARIOS,
   ehCenario,
@@ -11,13 +10,12 @@ import {
   type Cenario,
   type Servico,
 } from '@/lib/central/contracts'
+import type { ConsultaAlvo } from '@/lib/central/use-consulta'
 
 const MIN_NOME = 3
 const MAX_NOME = 120
 
-const provider = new MockProvider()
-
-const Index = () => {
+const Index = ({ onConsultar }: { onConsultar: (alvo: ConsultaAlvo) => void }) => {
   const [termo, setTermo] = useState('')
   const [cenario, setCenario] = useState<Cenario>('normal')
   const [clientes, setClientes] = useState<Cliente[] | null>(null)
@@ -227,6 +225,11 @@ const Index = () => {
               title={
                 podeConsultar ? undefined : 'Selecione um cliente e um serviço antes de consultar'
               }
+              onClick={() => {
+                if (clienteSel !== null && servicoSel !== null) {
+                  onConsultar({ cliente: clienteSel, servico: servicoSel, cenario })
+                }
+              }}
             >
               {podeConsultar ? 'Consultar' : 'Consultar (selecione cliente e serviço)'}
             </Button>

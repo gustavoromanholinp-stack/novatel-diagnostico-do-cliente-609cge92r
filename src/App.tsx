@@ -6,6 +6,7 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 import Index from './pages/Index'
 import NotFound from './pages/NotFound'
 import Layout from './components/Layout'
+import Central from './pages/Central'
 
 // ONLY IMPORT AND RENDER WORKING PAGES, NEVER ADD PLACEHOLDER COMPONENTS OR PAGES IN THIS FILE
 // AVOID REMOVING ANY CONTEXT PROVIDERS FROM THIS FILE (e.g. TooltipProvider, Toaster, Sonner)
@@ -17,7 +18,7 @@ const App = () => (
       <Sonner />
       <Routes>
         <Route element={<Layout />}>
-          <Route path="/" element={<Index />} />
+          <Route path="/" element={<Central />} />
           {/* ADD ALL CUSTOM ROUTES MUST BE ADDED HERE */}
         </Route>
         <Route path="*" element={<NotFound />} />
