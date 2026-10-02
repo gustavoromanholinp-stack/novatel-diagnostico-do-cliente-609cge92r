@@ -83,6 +83,16 @@ export const FATURA_SEM_DADOS: Fatura = {
   dias_vencidos: null,
 }
 
+/** Fatura do provider alternativo (CA-V12): R$ 99,00 pendente, relógio fixo. */
+export const FATURA_C: Fatura = {
+  id: 'F-C1',
+  valor_centavos: 9900,
+  moeda: 'BRL',
+  vencimento: '2026-09-30',
+  situacao: 'pendente',
+  dias_vencidos: 2,
+}
+
 export const INDICADOR_RX: Indicador = {
   id: 'I-AT-A1',
   ativo_id: 'AT-A1',
@@ -98,6 +108,29 @@ export const INDICADOR_RX: Indicador = {
 export const INDICADOR_RX_EXPIRADO: Indicador = {
   id: 'I-AT-A1',
   ativo_id: 'AT-A1',
+  valor: -23,
+  unidade: 'dBm',
+  observado_em: '2026-10-02T11:54:59Z',
+  coletado_em: '2026-10-02T12:00:00Z',
+  validade_segundos: 300,
+  estado: 'expirado',
+}
+
+/** Indicadores do provider alternativo (CA-V12): ativo AT-C1, mesmo relógio fixo. */
+export const INDICADOR_RX_C: Indicador = {
+  id: 'I-AT-C1',
+  ativo_id: 'AT-C1',
+  valor: -23,
+  unidade: 'dBm',
+  observado_em: '2026-10-02T11:55:00Z',
+  coletado_em: '2026-10-02T12:00:00Z',
+  validade_segundos: 300,
+  estado: 'ok',
+}
+
+export const INDICADOR_RX_C_EXPIRADO: Indicador = {
+  id: 'I-AT-C1',
+  ativo_id: 'AT-C1',
   valor: -23,
   unidade: 'dBm',
   observado_em: '2026-10-02T11:54:59Z',
