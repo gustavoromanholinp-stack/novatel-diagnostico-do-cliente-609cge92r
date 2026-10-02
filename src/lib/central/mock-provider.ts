@@ -165,7 +165,7 @@ export class MockProvider implements DataProvider {
     const cenario = opcoes.cenario ?? 'normal'
     await esperar(DELAY_BUSCA_MS, opcoes.signal)
     if (cenario === 'vazio_busca') return []
-    return SERVICOS.filter((s) => s.cliente_id === cliente_id)
+    return [...SERVICOS, ...SERVICOS_ALTERNATIVOS].filter((s) => s.cliente_id === cliente_id)
   }
 
   async getContext(
