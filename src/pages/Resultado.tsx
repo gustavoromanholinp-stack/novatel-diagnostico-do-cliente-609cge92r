@@ -126,6 +126,9 @@ const Resultado = ({ contexto, onVoltar }: Props) => {
                 {dadosTecnica.indicador.estado === 'expirado' ? ' · leitura expirada' : ''}
               </p>
             )}
+            {blocoTecnica?.estado === 'vazio' && dadosTecnica.indicador == null && (
+              <p role="status">Sem vínculo de ativo — telemetria não avaliada para este cliente.</p>
+            )}
             {dadosTecnica.equipamento_online === false && (
               <p>Equipamento offline (exemplo de demonstração).</p>
             )}

@@ -18,6 +18,8 @@ import type {
 import { MODO } from './contracts'
 import {
   CLIENTES,
+  CLIENTES_ALTERNATIVOS,
+  CLIENTE_C,
   FATURA_PAGA,
   FATURA_PENDENTE,
   FATURA_SEM_DADOS,
@@ -25,6 +27,8 @@ import {
   INDICADOR_RX_EXPIRADO,
   RELOGIO_FIXO,
   SERVICOS,
+  SERVICOS_ALTERNATIVOS,
+  SERVICO_C1,
 } from './fixtures'
 
 const DELAY_BUSCA_MS = 300
@@ -150,8 +154,9 @@ export class MockProvider implements DataProvider {
     await esperar(DELAY_BUSCA_MS, opcoes.signal)
     if (cenario === 'vazio_busca') return []
     const termo = nome.trim().toLowerCase()
-    if (termo === '') return [...CLIENTES]
-    return CLIENTES.filter(
+    if (termo === '') return [...CLIENTES, ...CLIENTES_ALTERNATIVOS]
+    const base = [...CLIENTES, ...CLIENTES_ALTERNATIVOS]
+    return base.filter(
       (c) => c.nome.toLowerCase().includes(termo) || c.referencia_mascarada.includes(termo),
     )
   }
@@ -197,8 +202,14 @@ export class MockProvider implements DataProvider {
     await esperar(DELAY_TECNICA_MS - DELAY_MK_MS, signal)
     emitir('tecnica', estadoTecnica)
 
-    const cliente = CLIENTES.find((c) => c.id === params.cliente_id) ?? null
-    const servico = SERVICOS.find((s) => s.id === params.servico_id) ?? null
+    const cliente =
+      CLIENTES.find((c) => c.id === params.cliente_id) ??
+      CLIENTES_ALTERNATIVOS.find((c) => c.id === params.cliente_id) ??
+      (params.cliente_id === CLIENTE_C.id ? CLIENTE_C : null)
+    const servico =
+      SERVICOS.find((s) => s.id === params.servico_id) ??
+      SERVICOS_ALTERNATIVOS.find((s) => s.id === params.servico_id) ??
+      (params.servico_id === SERVICO_C1.id ? SERVICO_C1 : null)
     const coletado = coletadoAgora()
 
     const fontes = [

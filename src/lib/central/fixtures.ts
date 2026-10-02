@@ -39,6 +39,23 @@ export const SERVICOS: Servico[] = [
   },
 ]
 
+/** Contexto alternativo sintético (TDD CA-V07): prova independência de IDs fixos. */
+export const CLIENTE_C: Cliente = {
+  id: 'C-C',
+  nome: 'Cliente Demonstração',
+  referencia_mascarada: '003',
+}
+export const SERVICO_C1: Servico = {
+  id: 'S-C1',
+  cliente_id: 'C-C',
+  tipo: 'fibra',
+  plano: 'Plano Demo 300',
+  conexao_id: 'ONU-C1',
+  ativo_id: 'AT-C1',
+}
+export const CLIENTES_ALTERNATIVOS: Cliente[] = [CLIENTE_C]
+export const SERVICOS_ALTERNATIVOS: Servico[] = [SERVICO_C1]
+
 export const FATURA_PENDENTE: Fatura = {
   id: 'F-A1',
   valor_centavos: 19990,
