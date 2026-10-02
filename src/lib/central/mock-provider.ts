@@ -108,7 +108,8 @@ function diagnosticoPorCenario(cenario: Cenario): Diagnostico {
     case 'problema_tecnico':
       return {
         estado: 'problema',
-        explicacao: 'Fonte técnica sintética reporta equipamento offline (exemplo).',
+        explicacao:
+          'Fonte técnica sintética reporta equipamento offline (exemplo). Prova de segurança: <b>exemplo</b> deve aparecer como texto, sem executar.',
         evidencias: ['AT-A1 offline (simulação)'],
         proximo_passo: 'Acionar o suporte técnico (demonstração).',
         coletivo: 'não avaliado',

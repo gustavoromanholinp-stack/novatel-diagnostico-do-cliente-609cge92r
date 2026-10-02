@@ -197,9 +197,20 @@ const Resultado = ({ contexto, onVoltar }: Props) => {
             {ESTADO_DIAG[contexto.diagnostico.estado]}
           </Badge>
           <p>{contexto.diagnostico.explicacao}</p>
+          {contexto.diagnostico.evidencias.length > 0 && (
+            <div>
+              <p className="font-medium">Evidências:</p>
+              <ul className="list-disc pl-5">
+                {contexto.diagnostico.evidencias.map((e, i) => (
+                  <li key={i}>{e}</li>
+                ))}
+              </ul>
+            </div>
+          )}
           <p>
             <span className="font-medium">Próximo passo:</span> {contexto.diagnostico.proximo_passo}
           </p>
+          <p className="text-muted-foreground">Coletivo: não avaliado nesta fase.</p>
         </CardContent>
       </Card>
 
