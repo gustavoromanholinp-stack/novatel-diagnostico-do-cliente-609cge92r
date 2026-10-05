@@ -59,14 +59,14 @@ const VARIANTE_DIAG: Record<string, 'secondary' | 'default' | 'destructive' | 'o
   inconclusivo: 'outline',
 }
 
-/** Série mensal sintética (demonstração) — consumo por mês, kWh. */
+/** Série mensal sintética (demonstração) — velocidade média por mês, Mbps. */
 const CONSUMO_MENSAL = [
-  { mes: 'Mai', consumo: 118, limite: 150 },
-  { mes: 'Jun', consumo: 132, limite: 150 },
-  { mes: 'Jul', consumo: 101, limite: 150 },
-  { mes: 'Ago', consumo: 145, limite: 150 },
-  { mes: 'Set', consumo: 126, limite: 150 },
-  { mes: 'Out', consumo: 138, limite: 150 },
+  { mes: 'Mai', consumo: 386, limite: 500 },
+  { mes: 'Jun', consumo: 421, limite: 500 },
+  { mes: 'Jul', consumo: 355, limite: 500 },
+  { mes: 'Ago', consumo: 468, limite: 500 },
+  { mes: 'Set', consumo: 402, limite: 500 },
+  { mes: 'Out', consumo: 440, limite: 500 },
 ]
 
 /** Composição sintética da última fatura (demonstração), em reais. */
@@ -302,8 +302,10 @@ const Resultado = ({ contexto, onVoltar }: Props) => {
       <div className="mt-8 grid gap-5 lg:grid-cols-5">
         <Card className="shadow-lg shadow-black/30 lg:col-span-3">
           <CardHeader>
-            <CardTitle className="text-lg">Consumo mensal (demonstração)</CardTitle>
-            <CardDescription>kWh por mês — série sintética; não mede operação real</CardDescription>
+            <CardTitle className="text-lg">Velocidade média mensal (demonstração)</CardTitle>
+            <CardDescription>
+              Mbps por mês — série sintética; não mede operação real
+            </CardDescription>
           </CardHeader>
           <CardContent className="h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -328,7 +330,7 @@ const Resultado = ({ contexto, onVoltar }: Props) => {
                 <Area
                   type="monotone"
                   dataKey="consumo"
-                  name="Consumo (kWh)"
+                  name="Velocidade (Mbps)"
                   stroke={CORES.ciano}
                   strokeWidth={2}
                   fill="url(#corConsumo)"
