@@ -118,7 +118,7 @@ const Index = ({ onConsultar }: { onConsultar: (alvo: ConsultaAlvo) => void }) =
               setErroNome(null)
             }
           }}
-          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm [&>option]:bg-card [&>option]:text-foreground"
         >
           {CENARIOS.map((c) => (
             <option key={c} value={c}>
