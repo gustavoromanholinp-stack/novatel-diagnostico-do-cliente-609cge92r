@@ -1,18 +1,76 @@
 /**
  * diagnostico_rede.js — rota de diagnóstico de rede (SPEC-2-001, passos 2–3, CA-2-02).
- * GET /backend/v1/diagnostico/rede — só superusuário, sem parâmetros, resposta
- * sanitizada (sem cabeçalhos, corpo da origem, mensagem bruta ou segredo).
- *
- * Spike de require (CA-2-04): tenta carregar a lib dentro do callback,
- * primeiro por caminho relativo. Falha de require → 500 { codigo: "erro_interno" }.
+ * GET /backend/v1/diagnostico/rede — só superusuário, resposta sanitizada.
+ * Ramo B do spike (CA-2-04): lib EMBUTIDA pelo scripts/embutir-lib.mjs
+ * (require relativo não existe no runtime goja do Skip Cloud — doc §15).
  */
 routerAdd(
   'GET',
   '/backend/v1/diagnostico/rede',
   (e) => {
+    // >>> lib:alcance sha256:b7aac8f3aedf6eab1992bc401212b5e9c4fc6d41320ee0b28f34752e814b54dd
+    const alcance = (function () {
+      function classificarErroTransporte(mensagem) {
+        if (typeof mensagem !== 'string') return 'outro'
+        const m = mensagem.toLowerCase()
+        if (m.indexOf('no such host') !== -1) return 'dns'
+        if (m.indexOf('x509') !== -1 || m.indexOf('tls:') !== -1) return 'tls'
+        if (
+          m.indexOf('client.timeout') !== -1 ||
+          m.indexOf('deadline exceeded') !== -1 ||
+          m.indexOf('i/o timeout') !== -1
+        )
+          return 'timeout'
+        if (m.indexOf('connection refused') !== -1) return 'recusada'
+        return 'outro'
+      }
+      function validarBase(url) {
+        if (typeof url !== 'string' || url.trim() === '')
+          return { host: null, configurado: false, chamar: false, estado: 'nao_configurado' }
+        if (url.indexOf('https://') !== 0 || url.indexOf('@') !== -1)
+          return { host: null, configurado: true, chamar: false, estado: 'url_invalida' }
+        let host = null
+        try {
+          host = new URL(url).host
+        } catch (e) {
+          host = null
+        }
+        if (host === null || host === '')
+          return { host: null, configurado: true, chamar: false, estado: 'url_invalida' }
+        return { host, configurado: true, chamar: true, estado: null }
+      }
+      function resumirChamada(dados) {
+        const d = dados || {}
+        if (d.status_http === null || d.status_http === undefined) {
+          if (d.erro_mensagem === null || d.erro_mensagem === undefined)
+            return {
+              estado: null,
+              status_http: null,
+              tls: null,
+              latencia_ms: null,
+              classe_erro: null,
+            }
+          const classe = classificarErroTransporte(d.erro_mensagem)
+          return {
+            estado: 'falha_transporte',
+            status_http: null,
+            tls: classe === 'tls' ? 'falha' : 'nao_verificado',
+            latencia_ms: d.fim_ms - d.inicio_ms,
+            classe_erro: classe,
+          }
+        }
+        return {
+          estado: 'alcancavel',
+          status_http: d.status_http,
+          tls: 'ok',
+          latencia_ms: d.fim_ms - d.inicio_ms,
+          classe_erro: null,
+        }
+      }
+      return { classificarErroTransporte, validarBase, resumirChamada }
+    })()
+    // <<< lib:alcance
     try {
-      const alcance = require('../lib/alcance.cjs')
-
       const lerSegredo = (chave) => {
         try {
           const v = $secrets.get(chave)
@@ -21,7 +79,6 @@ routerAdd(
           return ''
         }
       }
-
       const fontes = []
       for (const par of [
         { id: 'mk', segredo: 'MK_BASE_URL' },
@@ -69,7 +126,6 @@ routerAdd(
           classe_erro: resumo.classe_erro,
         })
       }
-
       $app
         .logger()
         .info(
