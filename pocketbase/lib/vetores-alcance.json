@@ -1,0 +1,210 @@
+[
+  {
+    "id": "V-AL-01",
+    "funcao": "validarBase",
+    "entrada": "",
+    "esperado": { "host": null, "configurado": false, "chamar": false, "estado": "nao_configurado" }
+  },
+  {
+    "id": "V-AL-02",
+    "funcao": "validarBase",
+    "entrada": "http://exemplo.invalid",
+    "esperado": { "host": null, "configurado": true, "chamar": false, "estado": "url_invalida" }
+  },
+  {
+    "id": "V-AL-03",
+    "funcao": "validarBase",
+    "entrada": "https://u:s@exemplo.invalid",
+    "esperado": { "host": null, "configurado": true, "chamar": false, "estado": "url_invalida" }
+  },
+  {
+    "id": "V-AL-04",
+    "funcao": "validarBase",
+    "entrada": "https://exemplo.invalid/api",
+    "esperado": { "host": "exemplo.invalid", "configurado": true, "chamar": true, "estado": null }
+  },
+  {
+    "id": "V-AL-05",
+    "funcao": "resumirChamada",
+    "entrada": { "status_http": 200, "inicio_ms": 1000, "fim_ms": 1250 },
+    "esperado": {
+      "estado": "alcancavel",
+      "status_http": 200,
+      "tls": "ok",
+      "latencia_ms": 250,
+      "classe_erro": null
+    }
+  },
+  {
+    "id": "V-AL-06",
+    "funcao": "resumirChamada",
+    "entrada": { "status_http": 401, "inicio_ms": 1000, "fim_ms": 1250 },
+    "esperado": {
+      "estado": "alcancavel",
+      "status_http": 401,
+      "tls": "ok",
+      "latencia_ms": 250,
+      "classe_erro": null
+    }
+  },
+  {
+    "id": "V-AL-07",
+    "funcao": "resumirChamada",
+    "entrada": { "status_http": 403, "inicio_ms": 1000, "fim_ms": 1250 },
+    "esperado": {
+      "estado": "alcancavel",
+      "status_http": 403,
+      "tls": "ok",
+      "latencia_ms": 250,
+      "classe_erro": null
+    }
+  },
+  {
+    "id": "V-AL-08",
+    "funcao": "resumirChamada",
+    "entrada": { "status_http": 500, "inicio_ms": 1000, "fim_ms": 1250 },
+    "esperado": {
+      "estado": "alcancavel",
+      "status_http": 500,
+      "tls": "ok",
+      "latencia_ms": 250,
+      "classe_erro": null
+    }
+  },
+  {
+    "id": "V-AL-09",
+    "funcao": "resumirChamada",
+    "entrada": {
+      "status_http": null,
+      "erro_mensagem": "dial tcp: lookup exemplo.invalid: no such host",
+      "inicio_ms": 1000,
+      "fim_ms": 1250
+    },
+    "esperado": {
+      "estado": "falha_transporte",
+      "status_http": null,
+      "tls": "nao_verificado",
+      "latencia_ms": 250,
+      "classe_erro": "dns"
+    }
+  },
+  {
+    "id": "V-AL-10",
+    "funcao": "resumirChamada",
+    "entrada": {
+      "status_http": null,
+      "erro_mensagem": "x509: certificate signed by unknown authority",
+      "inicio_ms": 1000,
+      "fim_ms": 1250
+    },
+    "esperado": {
+      "estado": "falha_transporte",
+      "status_http": null,
+      "tls": "falha",
+      "latencia_ms": 250,
+      "classe_erro": "tls"
+    }
+  },
+  {
+    "id": "V-AL-11",
+    "funcao": "resumirChamada",
+    "entrada": {
+      "status_http": null,
+      "erro_mensagem": "remote error: tls: handshake failure",
+      "inicio_ms": 1000,
+      "fim_ms": 1250
+    },
+    "esperado": {
+      "estado": "falha_transporte",
+      "status_http": null,
+      "tls": "falha",
+      "latencia_ms": 250,
+      "classe_erro": "tls"
+    }
+  },
+  {
+    "id": "V-AL-12",
+    "funcao": "resumirChamada",
+    "entrada": {
+      "status_http": null,
+      "erro_mensagem": "Client.Timeout exceeded while awaiting headers",
+      "inicio_ms": 1000,
+      "fim_ms": 1250
+    },
+    "esperado": {
+      "estado": "falha_transporte",
+      "status_http": null,
+      "tls": "nao_verificado",
+      "latencia_ms": 250,
+      "classe_erro": "timeout"
+    }
+  },
+  {
+    "id": "V-AL-13",
+    "funcao": "resumirChamada",
+    "entrada": {
+      "status_http": null,
+      "erro_mensagem": "context deadline exceeded",
+      "inicio_ms": 1000,
+      "fim_ms": 1250
+    },
+    "esperado": {
+      "estado": "falha_transporte",
+      "status_http": null,
+      "tls": "nao_verificado",
+      "latencia_ms": 250,
+      "classe_erro": "timeout"
+    }
+  },
+  {
+    "id": "V-AL-14",
+    "funcao": "resumirChamada",
+    "entrada": {
+      "status_http": null,
+      "erro_mensagem": "read tcp: i/o timeout",
+      "inicio_ms": 1000,
+      "fim_ms": 1250
+    },
+    "esperado": {
+      "estado": "falha_transporte",
+      "status_http": null,
+      "tls": "nao_verificado",
+      "latencia_ms": 250,
+      "classe_erro": "timeout"
+    }
+  },
+  {
+    "id": "V-AL-15",
+    "funcao": "resumirChamada",
+    "entrada": {
+      "status_http": null,
+      "erro_mensagem": "dial tcp: connection refused",
+      "inicio_ms": 1000,
+      "fim_ms": 1250
+    },
+    "esperado": {
+      "estado": "falha_transporte",
+      "status_http": null,
+      "tls": "nao_verificado",
+      "latencia_ms": 250,
+      "classe_erro": "recusada"
+    }
+  },
+  {
+    "id": "V-AL-16",
+    "funcao": "resumirChamada",
+    "entrada": {
+      "status_http": null,
+      "erro_mensagem": "mensagem desconhecida",
+      "inicio_ms": 1000,
+      "fim_ms": 1250
+    },
+    "esperado": {
+      "estado": "falha_transporte",
+      "status_http": null,
+      "tls": "nao_verificado",
+      "latencia_ms": 250,
+      "classe_erro": "outro"
+    }
+  }
+]

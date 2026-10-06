@@ -1,0 +1,26 @@
+[
+  {
+    "id": "V-PA-01",
+    "funcao": "compararCanonico",
+    "entrada": { "a": { "x": 1, "y": 2 }, "b": { "y": 2, "x": 1 } },
+    "esperado": true
+  },
+  {
+    "id": "V-PA-02",
+    "funcao": "compararCanonico",
+    "entrada": { "a": { "x": 1 }, "b": { "x": "1" } },
+    "esperado": false
+  },
+  {
+    "id": "V-PA-03",
+    "funcao": "compararCanonico",
+    "entrada": { "a": [1, 2], "b": [2, 1] },
+    "esperado": false
+  },
+  {
+    "id": "V-PA-04",
+    "funcao": "compararCanonico",
+    "entrada": { "a": { "x": null }, "b": {} },
+    "esperado": false
+  }
+]
