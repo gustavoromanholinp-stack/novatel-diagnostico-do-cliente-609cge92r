@@ -46,7 +46,8 @@ function verificarHook(fonte, arquivo) {
     const nome = bloco[1]
     marcadores.add(nome)
     const esperado = `// >>> lib:${nome} sha256:${sha256Arquivo(arquivoLib(nome))}\n${conteudoEmbutido(nome)}\n// <<< lib:${nome}\n`
-    if (bloco[0] !== esperado) problemas.push(`${arquivo}: bloco de ${nome} divergente ou hash desatualizado`)
+    if (bloco[0] !== esperado)
+      problemas.push(`${arquivo}: bloco de ${nome} divergente ou hash desatualizado`)
   }
 
   const semBlocos = fonte
@@ -56,8 +57,11 @@ function verificarHook(fonte, arquivo) {
     .filter((linha) => !linha.trim().startsWith('//'))
     .join('\n')
 
-  const nomes = fs.readdirSync(libDir)
-    .filter((nome) => nome.endsWith('.json') || (nome.endsWith('.cjs') && !nome.endsWith('.test.cjs')))
+  const nomes = fs
+    .readdirSync(libDir)
+    .filter(
+      (nome) => nome.endsWith('.json') || (nome.endsWith('.cjs') && !nome.endsWith('.test.cjs')),
+    )
     .map((nome) => nome.replace(/\.(cjs|json)$/, ''))
   for (const nome of nomes) {
     const ident = nome.replaceAll('-', '_')
@@ -85,6 +89,11 @@ test('divergencia: alteração no bloco, hash antigo e remoção do bloco são d
   const hashAntigo = original.replace(/(sha256:)[0-9a-f]{64}/, `$1${'0'.repeat(64)}`)
   assert.ok(verificarHook(hashAntigo, arquivo).some((p) => p.includes('hash desatualizado')))
 
-  const semBloco = original.replace(/    \/\/ >>> lib:alcance sha256:[0-9a-f]{64}\n[\s\S]*?\/\/ <<< lib:alcance\n/, '')
-  assert.ok(verificarHook(semBloco, arquivo).some((p) => p.includes('usa alcance sem bloco embutido')))
+  const semBloco = original.replace(
+    /    \/\/ >>> lib:alcance sha256:[0-9a-f]{64}\n[\s\S]*?\/\/ <<< lib:alcance\n/,
+    '',
+  )
+  assert.ok(
+    verificarHook(semBloco, arquivo).some((p) => p.includes('usa alcance sem bloco embutido')),
+  )
 })

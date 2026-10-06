@@ -82,7 +82,8 @@ function validarBase(url) {
     const rotulos = nomeHost.split('.')
     for (const rotulo of rotulos) {
       if (
-        rotulo.length === 0 || rotulo.length > 63 ||
+        rotulo.length === 0 ||
+        rotulo.length > 63 ||
         !/^[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?$/.test(rotulo)
       ) {
         return { host: null, configurado: true, chamar: false, estado: 'url_invalida' }
