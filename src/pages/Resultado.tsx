@@ -106,6 +106,7 @@ const Resultado = ({ contexto, onVoltar }: Props) => {
     faturas?: {
       id: string
       valor_centavos: number
+      vencimento?: string | null
       situacao: string | null
       dias_vencidos: number | null
     }[]

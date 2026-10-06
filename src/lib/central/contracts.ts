@@ -73,7 +73,7 @@ export interface Diagnostico {
 
 export interface FonteInfo {
   id: string
-  nome: 'Simulação MK' | 'Simulação técnica'
+  nome: string
   estado: EstadoFonte
   coletado_em: string
   motivo: string | null
