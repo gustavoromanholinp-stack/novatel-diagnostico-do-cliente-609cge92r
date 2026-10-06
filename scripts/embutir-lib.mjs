@@ -51,7 +51,11 @@ for (const arquivo of readdirSync(hooksDir)) {
   const saida = original.replaceAll(
     /\/\/ >>> lib:([\w-]+) sha256:[0-9a-f]{64}\n([\s\S]*?)\/\/ <<< lib:\1\n/g,
     (inteiro, nome) => {
-      const hash = sha256Arquivo(join(libDir, nome.endsWith('.json') ? nome : `${nome}.cjs`))
+      const cjsPath = join(libDir, `${nome}.cjs`)
+      const jsonPath = join(libDir, `${nome}.json`)
+      const libPath = existsSync(cjsPath) ? cjsPath : jsonPath
+      if (!existsSync(libPath)) throw new Error(`arquivo da lib "${nome}" não existe`)
+      const hash = sha256Arquivo(libPath)
       const novo = `// >>> lib:${nome} sha256:${hash}\n${conteudoEmbutido(nome)}\n// <<< lib:${nome}\n`
       return novo === inteiro ? inteiro : novo
     },

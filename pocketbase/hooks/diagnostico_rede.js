@@ -104,7 +104,8 @@ routerAdd(
         let erro = null
         try {
           const resp = $http.send({ url: base, method: 'GET', timeout: 10 })
-          status = resp.status
+          status = alcance.extrairStatusHttp(resp)
+          if (status === null) erro = 'status_code_indisponivel'
         } catch (ex) {
           erro = String(ex && ex.message ? ex.message : ex)
         }

@@ -1,9 +1,6 @@
 /**
- * divergencia.test.cjs — guarda do ramo B (SPEC-2-001, CA-2-04).
- * Percorre todos os pocketbase/hooks/*.js e falha se:
- * 1. um bloco embutido difere da lib regenerada;
- * 2. o hash do bloco está desatualizado;
- * 3. um hook que usa o identificador de uma lib fora de bloco não tem o bloco dela.
+ * divergencia.test.cjs — valida que as cópias inline dos hooks correspondem
+ * às libs de fonte, incluindo JSON, hashes e usos sem bloco embutido.
  */
 const test = require('node:test')
 const assert = require('node:assert')
@@ -14,6 +11,14 @@ const { createHash } = require('node:crypto')
 const raiz = path.join(__dirname, '..', '..')
 const hooksDir = path.join(raiz, 'pocketbase', 'hooks')
 const libDir = path.join(raiz, 'pocketbase', 'lib')
+
+function arquivoLib(nome) {
+  const cjs = path.join(libDir, `${nome}.cjs`)
+  const json = path.join(libDir, `${nome}.json`)
+  if (fs.existsSync(cjs)) return cjs
+  if (fs.existsSync(json)) return json
+  throw new Error(`arquivo da lib "${nome}" não existe`)
+}
 
 function sha256Arquivo(caminho) {
   return createHash('sha256').update(fs.readFileSync(caminho)).digest('hex')
@@ -33,39 +38,53 @@ function conteudoEmbutido(nome) {
   throw new Error(`arquivo da lib "${nome}" não existe`)
 }
 
-test('divergencia: blocos embutidos dos hooks batem com as libs regeneradas e hashes atualizados', () => {
+function verificarHook(fonte, arquivo) {
   const problemas = []
-  for (const arquivo of fs.readdirSync(hooksDir)) {
-    if (!arquivo.endsWith('.js')) continue
-    const fonte = fs.readFileSync(path.join(hooksDir, arquivo), 'utf8')
+  const marcadores = new Set()
+  const regexBloco = /\/\/ >>> lib:([\w-]+) sha256:([0-9a-f]{64})\n([\s\S]*?)\/\/ <<< lib:\1\n/g
+  for (const bloco of fonte.matchAll(regexBloco)) {
+    const nome = bloco[1]
+    marcadores.add(nome)
+    const esperado = `// >>> lib:${nome} sha256:${sha256Arquivo(arquivoLib(nome))}\n${conteudoEmbutido(nome)}\n// <<< lib:${nome}\n`
+    if (bloco[0] !== esperado) problemas.push(`${arquivo}: bloco de ${nome} divergente ou hash desatualizado`)
+  }
 
-    // 1+2. cada bloco deve regenerar idêntico (inclui hash)
-    const blocos = fonte.matchAll(
-      /\/\/ >>> lib:([\w-]+) sha256:[0-9a-f]{64}\n([\s\S]*?)\/\/ <<< lib:\1\n/g,
-    )
-    for (const [, nome] of blocos) {
-      const esperado = `// >>> lib:${nome} sha256:${sha256Arquivo(path.join(libDir, nome.endsWith('.json') ? nome : `${nome}.cjs`))}\n${conteudoEmbutido(nome)}\n// <<< lib:${nome}\n`
-      const atual = fonte.match(
-        new RegExp(`// >>> lib:${nome} sha256:[0-9a-f]{64}\\n[\\s\\S]*?// <<< lib:${nome}\\n`),
-      )
-      if (atual === null || atual[0] !== esperado) {
-        problemas.push(`${arquivo}: bloco de ${nome} divergente ou hash desatualizado`)
-      }
-    }
+  const semBlocos = fonte
+    .replace(/\/\/ >>> lib:([\w-]+) sha256:[0-9a-f]{64}\n[\s\S]*?\/\/ <<< lib:\1\n/g, '')
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .split('\n')
+    .filter((linha) => !linha.trim().startsWith('//'))
+    .join('\n')
 
-    // 3. identificador de lib usado fora de bloco exige o bloco
-    const idents = new Set()
-    for (const [, nome] of fonte.matchAll(/\/\/ >>> lib:([\w-]+) /g)) {
-      idents.add(nome.replaceAll('-', '_'))
-    }
-    for (const ident of idents) {
-      const usos = fonte
-        .split('\n')
-        .filter((l) => !l.startsWith('//') && l.includes(ident + '.')).length
-      if (usos > 0 && !fonte.includes(`// >>> lib:`)) {
-        problemas.push(`${arquivo}: usa ${ident} sem bloco embutido`)
-      }
+  const nomes = fs.readdirSync(libDir)
+    .filter((nome) => nome.endsWith('.json') || (nome.endsWith('.cjs') && !nome.endsWith('.test.cjs')))
+    .map((nome) => nome.replace(/\.(cjs|json)$/, ''))
+  for (const nome of nomes) {
+    const ident = nome.replaceAll('-', '_')
+    if (new RegExp(`\\b${ident}\\b`).test(semBlocos) && !marcadores.has(nome)) {
+      problemas.push(`${arquivo}: usa ${ident} sem bloco embutido`)
     }
   }
+  return problemas
+}
+
+test('divergencia: todos os hooks correspondem às libs e hashes atuais', () => {
+  const problemas = []
+  for (const arquivo of fs.readdirSync(hooksDir).filter((nome) => nome.endsWith('.js'))) {
+    problemas.push(...verificarHook(fs.readFileSync(path.join(hooksDir, arquivo), 'utf8'), arquivo))
+  }
   assert.deepStrictEqual(problemas, [])
+})
+
+test('divergencia: alteração no bloco, hash antigo e remoção do bloco são detectados', () => {
+  const arquivo = 'diagnostico_rede.js'
+  const original = fs.readFileSync(path.join(hooksDir, arquivo), 'utf8')
+  const alterado = original.replace('no such host', 'alteracao manual')
+  assert.ok(verificarHook(alterado, arquivo).some((p) => p.includes('divergente')))
+
+  const hashAntigo = original.replace(/(sha256:)[0-9a-f]{64}/, `$1${'0'.repeat(64)}`)
+  assert.ok(verificarHook(hashAntigo, arquivo).some((p) => p.includes('hash desatualizado')))
+
+  const semBloco = original.replace(/    \/\/ >>> lib:alcance sha256:[0-9a-f]{64}\n[\s\S]*?\/\/ <<< lib:alcance\n/, '')
+  assert.ok(verificarHook(semBloco, arquivo).some((p) => p.includes('usa alcance sem bloco embutido')))
 })

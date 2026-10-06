@@ -32,19 +32,82 @@ function validarBase(url) {
   if (typeof url !== 'string' || url.trim() === '') {
     return { host: null, configurado: false, chamar: false, estado: 'nao_configurado' }
   }
-  if (url.indexOf('https://') !== 0 || url.indexOf('@') !== -1) {
+  const valor = url.trim()
+  if (
+    valor.indexOf('https://') !== 0 ||
+    valor.indexOf('@') !== -1 ||
+    /[\u0000-\u0020\u007f\\]/.test(valor)
+  ) {
     return { host: null, configurado: true, chamar: false, estado: 'url_invalida' }
   }
-  let host = null
-  try {
-    host = new URL(url).host
-  } catch (e) {
-    host = null
-  }
-  if (host === null || host === '') {
+
+  // Goja/PocketBase não fornece o construtor WHATWG `URL`; parsear somente
+  // a autoridade HTTPS com ES5, sem depender de APIs de browser/Node.
+  const restante = valor.slice('https://'.length)
+  const fimAutoridade = restante.search(/[/?#]/)
+  const autoridade = fimAutoridade < 0 ? restante : restante.slice(0, fimAutoridade)
+  if (autoridade === '') {
     return { host: null, configurado: true, chamar: false, estado: 'url_invalida' }
   }
+
+  let nomeHost = ''
+  let porta = ''
+  if (autoridade.charAt(0) === '[') {
+    const fechamento = autoridade.indexOf(']')
+    if (fechamento < 0) {
+      return { host: null, configurado: true, chamar: false, estado: 'url_invalida' }
+    }
+    const ipv6 = autoridade.slice(1, fechamento)
+    const sobra = autoridade.slice(fechamento + 1)
+    if (ipv6.indexOf(':') < 0 || !/^[0-9a-f:.]+$/i.test(ipv6)) {
+      return { host: null, configurado: true, chamar: false, estado: 'url_invalida' }
+    }
+    nomeHost = autoridade.slice(0, fechamento + 1)
+    if (sobra !== '') {
+      if (sobra.charAt(0) !== ':' || !/^[0-9]+$/.test(sobra.slice(1))) {
+        return { host: null, configurado: true, chamar: false, estado: 'url_invalida' }
+      }
+      porta = sobra.slice(1)
+    }
+  } else {
+    const partes = autoridade.match(/^([A-Za-z0-9.-]+)(?::([0-9]+))?$/)
+    if (!partes) {
+      return { host: null, configurado: true, chamar: false, estado: 'url_invalida' }
+    }
+    nomeHost = partes[1]
+    porta = partes[2] || ''
+    if (nomeHost.length > 253) {
+      return { host: null, configurado: true, chamar: false, estado: 'url_invalida' }
+    }
+    const rotulos = nomeHost.split('.')
+    for (const rotulo of rotulos) {
+      if (
+        rotulo.length === 0 || rotulo.length > 63 ||
+        !/^[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?$/.test(rotulo)
+      ) {
+        return { host: null, configurado: true, chamar: false, estado: 'url_invalida' }
+      }
+    }
+  }
+
+  if (porta !== '') {
+    const numeroPorta = Number(porta)
+    if (numeroPorta < 1 || numeroPorta > 65535) {
+      return { host: null, configurado: true, chamar: false, estado: 'url_invalida' }
+    }
+    porta = String(numeroPorta)
+  }
+  const host = nomeHost + (porta === '' ? '' : ':' + porta)
   return { host, configurado: true, chamar: true, estado: null }
+}
+
+/** Lê o nome de campo documentado pelo PocketBase JSVM ($http.send). */
+function extrairStatusHttp(resposta) {
+  const status = resposta && resposta.statusCode
+  if (typeof status !== 'number' || status < 100 || status > 599 || Math.floor(status) !== status) {
+    return null
+  }
+  return status
 }
 
 /**
@@ -83,4 +146,4 @@ function resumirChamada(dados) {
   }
 }
 
-module.exports = { classificarErroTransporte, validarBase, resumirChamada }
+module.exports = { classificarErroTransporte, validarBase, extrairStatusHttp, resumirChamada }
